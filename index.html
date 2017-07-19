@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es/ES">
+<head>
+	<meta charset="UTF-8">
+	<title>AJAX TEST SERVER</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href='https://fonts.googleapis.com/css?family=Sofia' rel='stylesheet'>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-5">
+				<h1>Music Search</h1>
+				<audio controls>
+  <source src="horse.ogg" type="audio/ogg">
+  <source src="horse.mp3" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+				<form>
+					<input id="artistSearch" class="form-control form-control-lg" type="text" name="artist" placeholder="Introduce the artist or group name">
+					<button class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>
+				</form>
+				<ul id="artistsList">
+				</ul>
+			</div>
+			<div class="col-xs-offset-1 col-xs-6">
+				<ul id="albumList">
+				</ul>
+			</div>
+		</div>
+	</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+	var token= 'BQC4HOp27rJIvAl2C-KSDaxZF7THQ1iF6sAVASimcXY2QihRCLfwa_FgH_jBw-Lsu1-xYHzMjM_GvbcDxOo60plNg5omqBHlT3YL8OowSaUJ4w4NJDNrc1hlcg9LxOFK9HwPoFrUbXQ';
+	$(document).submit(function(event){event.preventDefault();});
+	$('button').click(function(){	
+			var search=	$('#artistSearch').val();	
+			var url = 'https://api.spotify.com/v1/search?q=+'+search+'&type=artist';
+			searchArtist(url);
+	})
+			
+	function searchArtist(url){
+		$.ajax({
+				url: url,
+				headers: {
+			        Authorization: 'Bearer ' + token
+			     }
+			})
+			.done(function(results){			//recibimos los datos
+				 listingArtists(results.artists.items);
+				 $('.artist-item').click(function(){
+				 	searchAlbum($(this).attr('data-id'));
+				 })
+				 								//second request must be here
+			})
+			.fail(function(){
+				alert('conexion faild');
+			});	
+	}
+	
+
+	function searchAlbum(artistId){
+		var urlAlbumSearch='https://api.spotify.com/v1/artists/'+artistId+'/albums';
+			$.ajax({
+				url: urlAlbumSearch,
+				headers: {
+			        Authorization: 'Bearer ' + token
+			     }
+			})
+			.done(function(results){			   //recibimos los datos
+				 listingAlbums(results.items);
+				 $('.album-item').click(function(){
+				 	reproduce($(this).attr('data-id'));
+				 }) 
+			})
+			.fail(function(){
+				alert('conexion faild');
+			});	
+	}		
+
+	function listingArtists(results){
+			results.forEach(function(artist){
+					$('#artistsList').append('<li><a class="artist-item" data-id="' + artist.id + '" href="#">'+artist.name+'</a></li>')
+			})
+	}
+
+	function listingAlbums(results){
+			results.forEach(function(album){
+					$('#albumList').append('<li><a class="album-item" data-id="' + album.id + '" href="#">'+album.name+'</a></li>')
+			})
+	}
+	function reproduce(song){
+		var songUrl= 'https://api.spotify.com/v1/albums/'+song+'/tracks';
+			$.ajax({
+				url: songUrl,
+				headers: {
+			        Authorization: 'Bearer ' + token
+			     }
+			})
+			.done(function(results){			   //recibimos los datos
+				console.log(results.items)
+			})
+			.fail(function(){
+				alert('conexion faild');
+			});	
+	}
+</script>
+</body>
+</html>
+
+
+//click
+//busqueda
+//listar
+//click2
+//busqueda2
+//listar2
+//click3
+//busqueda3
+//listar3
+//click4
+//reproduce
